@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# BE CAREFULL, the script is NOT COMPLETED YET, you may experience failure through the script behaviour
+
+
 echo "----------------------------------"
 echo "Here is a list of all zfs datasets (and lxc mount points)"
 echo "----------------------------------"
