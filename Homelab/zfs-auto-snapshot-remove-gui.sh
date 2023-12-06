@@ -21,7 +21,7 @@ fi
 selected_snapshots=()
 
 for selected_dataset in $selected_datasets; do
-    snapshots=$(zfs list -t snapshot -o name -r "$selected_dataset" | awk '{print $1}' | grep -v '@$' | grep -v 'NAME')
+    snapshots=$(zfs list -t snapshot -o name -r "$selected_dataset" | awk '{print $1}' | grep -v '@$' | grep -v 'NAME' | grep "auto-snap")
 
     if [ -n "$snapshots" ]; then
         # Append snapshots to the array
