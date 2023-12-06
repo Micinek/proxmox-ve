@@ -14,7 +14,7 @@ selected_datasets=$(whiptail --title "ZFS Dataset Selection" --separate-output -
 
 
 if [ $? -ne 0 ]; then
-    echo "Error occurred during the last command. DATASET"
+    echo "Error occurred during dataset selection."
     exit 1
 fi
 
@@ -22,7 +22,7 @@ selected_snapshots=()
 
 for selected_dataset in $selected_datasets; do
     snapshots=$(zfs list -t snapshot -o name -r "$selected_dataset" | awk '{print $1}' | grep -v '@$' | grep -v 'NAME')
-....
+
     if [ -n "$snapshots" ]; then
         # Append snapshots to the array
         selected_snapshots+=($snapshots)
@@ -41,18 +41,18 @@ while true; do
     # ... (previous code remains unchanged)
 
     # Use whiptail to create a menu and store the selected snapshots in a variable
-    selected_snapshots=$(whiptail --title "ZFS Snapshot Selection" --separate-output --checklist "Select Snapshots to delete:" 40 80 35 "${snapshot_options[@]}" 3>&1 1>&2 2>&3)
+    selected_snapshots=$(whiptail --title "ZFS Snapshot Selection to DESTROY" --separate-output --checklist "Select Snapshots to delete:" 40 80 35 "${snapshot_options[@]}" 3>&1 1>&2 2>&3)
 
     if [ $? -ne 0 ]; then
-        echo "Error occurred during the last command. SNAPSHOT"
+        echo "Error occurred during snapshot selection."
         exit 1
     elif [ -z "$selected_snapshots" ]; then
-        echo "No snapshots selected. SNAPSHOT"
+        echo "No snapshots selected."
         exit 1
     fi
 
     # Display selected snapshots in a table for confirmation
-    whiptail --title "Selected Snapshots Confirmation" --yesno "Selected snapshots:\n\n$selected_snapshots\n\nIs this correct?" 20 60
+    whiptail --title "DESTROY Snapshots Confirmation" --yesno "Selected snapshots will be DESTROYED:\n\n$selected_snapshots\n\nIs this correct?" 20 60
 
     # Check the exit status of the confirmation whiptail command
     if [ $? -eq 0 ]; then
@@ -65,7 +65,6 @@ while true; do
 done
 
 # If user confirms, proceed with echoing the selected snapshots
-echo "Selected snapshots:"
-for selected_snapshot in $selected_snapshots; do
-    echo "$selected_snapshot"
-done
+echo "Deleting snapshots:"
+echo "$selected_snapshots" | xargs -n 1 zfs destroy -v
+
