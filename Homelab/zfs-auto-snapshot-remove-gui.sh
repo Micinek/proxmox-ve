@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Get a list of ZFS datasets excluding 'rpool' and 'subvol'
-#datasets=$(zfs list -t filesystem -o name | grep -v 'rpool' | grep -v 'subvol' | grep -v 'NAME')
 datasets=$(zfs list -t filesystem -o name 2> zfs_error.log | grep -v 'rpool' | grep -v 'subvol' | grep -v 'NAME')
 
 # Create an array for whiptail menu
@@ -11,15 +10,13 @@ for dataset in $datasets; do
 done
 
 # Use whiptail to create a menu and store the selected datasets in a variable
-selected_datasets=$(whiptail --title "ZFS Dataset Selection" --separate-output --checklist "Select datasets to show snapshots:" 20
+selected_datasets=$(whiptail --title "ZFS Dataset Selection" --separate-output --checklist "Select datasets to show snapshots:" 25 40 15 "${options[@]}" 3>&1 1>&2 2>&3)
 
 
 if [ $? -ne 0 ]; then
     echo "Error occurred during the last command. DATASET"
     exit 1
 fi
-
-echo "SANITY. You selected this: $selected_datasets"
 
 selected_snapshots=()
 
@@ -34,12 +31,6 @@ for selected_dataset in $selected_datasets; do
     fi
 done
 
-# Print the selected snapshots
-echo "Selected snapshots:"
-for snapshot in "${selected_snapshots[@]}"; do
-    echo "$snapshot"
-done
-
 # Create an array for whiptail menu
 snapshot_options=()
 for snapshot in "${selected_snapshots[@]}"; do
@@ -50,7 +41,7 @@ while true; do
     # ... (previous code remains unchanged)
 
     # Use whiptail to create a menu and store the selected snapshots in a variable
-    selected_snapshots=$(whiptail --title "ZFS Snapshot Selection" --separate-output --checklist "Select Snapshots to delete:" 20
+    selected_snapshots=$(whiptail --title "ZFS Snapshot Selection" --separate-output --checklist "Select Snapshots to delete:" 40 80 35 "${snapshot_options[@]}" 3>&1 1>&2 2>&3)
 
     if [ $? -ne 0 ]; then
         echo "Error occurred during the last command. SNAPSHOT"
@@ -61,7 +52,7 @@ while true; do
     fi
 
     # Display selected snapshots in a table for confirmation
-    whiptail --title "Selected Snapshots Confirmation" --yesno "Selected snapshots:\n\n$selected_snapshots\n\nIs this correct?" 20
+    whiptail --title "Selected Snapshots Confirmation" --yesno "Selected snapshots:\n\n$selected_snapshots\n\nIs this correct?" 20 60
 
     # Check the exit status of the confirmation whiptail command
     if [ $? -eq 0 ]; then
@@ -78,4 +69,3 @@ echo "Selected snapshots:"
 for selected_snapshot in $selected_snapshots; do
     echo "$selected_snapshot"
 done
-
