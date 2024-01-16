@@ -1,5 +1,10 @@
 #!/bin/bash
 
+echo "Write your Github Username from which you want to import keys:"
+
+# GitHub username to fetch keys
+read GITHUB_USER
+
 # Check if sudo is present
 if command -v sudo &>/dev/null; then
     # Use sudo
@@ -29,9 +34,6 @@ if ! command -v curl &>/dev/null; then
         exit 1
     fi
 fi
-
-# GitHub username to fetch keys
-GITHUB_USER="YOUR_GITHUB_USERNAME"
 
 # Path to the SSH directory
 SSH_DIR="$HOME/.ssh"
