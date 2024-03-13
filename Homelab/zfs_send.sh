@@ -48,27 +48,11 @@ if ! ssh -o ConnectTimeout=5 $destination_host exit; then
   exit 1
 fi
 
-# Ask user for send type (new or incremental)
-read -p "Enter send type (full or incremental): " send_type
 
-# Validate user input (optional)
-send_type=$(tr [A-Z] [a-z] <<< "$send_type")  # Convert to lowercase for case-insensitive comparison
-if [[ ! ( "$send_type" == "full" || "$send_type" == "incremental" ) ]]; then
-  echo "Invalid send type. Please enter 'full' or 'incremental'."
-  exit 1
-fi
+echo "Performing full ZFS send..."
+create_temp_snapshot
+zfs send -R $source_pool/$source_dataset@$snapshot_name | pv | ssh $destination_host "zfs recv -dFu $destination_dataset"
 
-# Perform chosen send type
-if [[ "$send_type" == "full" ]]; then
-  echo "Performing full ZFS send..."
-  create_temp_snapshot
-  zfs send -R $source_pool/$source_dataset@$snapshot_name | pv | ssh $destination_host "zfs recv -F $destination_dataset"
-else
-  echo "Performing incremental ZFS send..."
-  create_temp_snapshot
-  zfs send -R -I $source_pool/$source_dataset@$snapshot_name | pv | ssh $destination_host "zfs recv -dFu $destination_dataset"
-  # ... (remaining script logic for incremental send)
-fi
 
 # Cleanup temporary snapshot (uncomment if the function is used)
 if [ -n "$snapshot_name" ] && [[ "$snapshot_name" == temp_* ]]; then
