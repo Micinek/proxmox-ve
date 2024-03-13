@@ -4,8 +4,8 @@
 if ! command -v pv >/dev/null 2>&1; then
   echo "pv command not found. Installing..."
   # Use sudo for package installation (assuming you have root or sudo privileges)
-  sudo apt update
-  sudo apt install pv
+  apt update
+  apt install pv
 else
   echo "pv command found. Proceeding..."
 fi
@@ -48,10 +48,16 @@ if ! ssh -o ConnectTimeout=5 $destination_host exit; then
   exit 1
 fi
 
+# Function to show size of the transfered dataset
+source_size() {
+  zfs get -o value used $source_pool/$source_dataset
+}
+
 
 echo "Performing full ZFS send..."
 create_temp_snapshot
-zfs send -R $source_pool/$source_dataset@$snapshot_name | pv | ssh $destination_host "zfs recv -dFu $destination_dataset"
+echo "Source dataset size: $source_size"
+zfs send -R $source_pool/$source_dataset@$snapshot_name | pv | ssh $destination_host "zfs recv -F $destination_dataset"
 
 
 # Cleanup temporary snapshot (uncomment if the function is used)
