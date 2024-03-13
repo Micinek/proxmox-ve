@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Check for pv availability
+if ! command -v pv >/dev/null 2>&1; then
+  echo "pv command not found. Installing..."
+  # Use sudo for package installation (assuming you have root or sudo privileges)
+  sudo apt update
+  sudo apt install pv
+else
+  echo "pv command found. Proceeding..."
+fi
+
 # Check for screen and tmux availability
 screen_available=$(command -v screen >/dev/null 2>&1; echo $?)
 tmux_available=$(command -v tmux >/dev/null 2>&1; echo $?)
